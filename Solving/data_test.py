@@ -4,6 +4,9 @@ import rapidfuzz.fuzz as fuzz
 import puz
 from timeit import default_timer as timer
 from puzzle_solver import *
+import openai
+
+openai.api_key = "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"
 
 
 # find the clues that match the given clue by indexing the data frame
@@ -46,7 +49,7 @@ if __name__ == '__main__':
 
     # initialize the data frame with the correct encoding
     # data = pd.read_csv('Puzzles/NYTData/nytcrosswords.csv', encoding='latin-1')
-    data = pd.read_csv('Puzzles/Data/train.csv', encoding='latin-1')
+    data = pd.read_csv('Solving/Data/train.csv', encoding='latin-1')
     start = timer()
 
     full_grid = make_solved_grid(p)
@@ -84,7 +87,6 @@ if __name__ == '__main__':
     merged_grid_v = merge_grids(v_grid, h_grid)
     merged_grid = get_common_grid(merged_grid_h, merged_grid_v)
     analyze(merged_grid, full_grid)
-
 
     # # # revise the grid starting from the vertical guesses
     # h_candidates = find_horizontal_candidates(v_grid, full_grid, across, threshold=0.1)
@@ -149,7 +151,6 @@ if __name__ == '__main__':
     h_candidates = find_horizontal_candidates(common_grid, full_grid, across, threshold=-.1)
     print(h_candidates)
 
-
     save_grid(common_grid, f"{file_name}_revised")
     revised_grid = load_grid(f"{file_name}_revised")
     acc = analyze(revised_grid, full_grid)
@@ -169,7 +170,6 @@ if __name__ == '__main__':
     #     revised_grid = revise_horizontal(revised_grid, h_candidates)
     #     h_candidates, v_candidates = find_revision_candidates(revised_grid, full_grid, across, down, threshold=0.49)
     #     analyze(revised_grid, full_grid)
-
 
     save_grid(revised_grid, f"{file_name}_revised")
 

@@ -4,9 +4,9 @@ from keras.layers import Embedding, LSTM, Dense
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences
 import tensorflow as tf
+
 # Set the visible devices to use the CPU
 tf.config.set_visible_devices([], 'GPU')
-
 
 if __name__ == '__main__':
     # Load the training and validation data

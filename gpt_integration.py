@@ -1,9 +1,8 @@
-# my key: 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
 
 import openai
 
 # set up your OpenAI API key
-openai.api_key = "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"
+openai.api_key = "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"
 
 
 def generate_description(clue, answer):
@@ -227,5 +226,5 @@ if __name__ == '__main__':
 
     # print(revise_answer("Sailboat pole", 4, "M_ST"))
     # print(generate_answer_3("Sailboat pole", 4))
-    # print(generate_answer_3("'Bob Hearts Abishola' network", 3))
+    print(generate_answer_3("'Bob Hearts Abishola' network", 3))
     #

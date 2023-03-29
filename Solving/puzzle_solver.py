@@ -2,6 +2,9 @@ import puz
 import gpt_integration
 import csv
 from timeit import default_timer as timer
+import openai
+
+openai.api_key = "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"
 
 
 def initialize_clues(puzzle):
