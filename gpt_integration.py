@@ -1,9 +1,47 @@
-
 import openai
 
-# set up your OpenAI API key
-openai.api_key = "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"
+# Put OpenAI API key here
 
+def check_answer(clue, length, known_info, tries=1):
+    candidates = []
+    for i in range(tries):
+        question = f"""I'm trying to solve the following clue in a crossword puzzle:
+"{clue}"
+This is the current answer to the clue:
+{known_info}
+give me a corrected answer surrounded by brackets. For example, if the answer is "hello", you would write "[hello]"
+"""
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system",
+                 "content": "You are a crossword solver, and you are trying to solve a crossword puzzle. you will be given a clue and information about the answer."},
+                {"role": "user", "content": question},
+            ]
+        )
+        answer = ''
+        for choice in response.choices:
+            answer += choice.message.content
+        print(answer)
+        # find the answer in the response
+        # check if the answer is in the response
+        if (answer.count('[') != 0) and (answer.count(']') != 0):
+            answer = answer[answer.find('[') + 1:answer.find(']')]
+        # remove any numbers and punctuation from the answer
+        answer = ''.join([c for c in answer if c.isalpha()])
+        # make sure the answer is the correct length
+        if len(answer) == length:
+            candidates.append(answer.upper())
+            print(candidates)
+
+    # remove any candidate that areen't the correct length
+    candidates = [c for c in candidates if len(c) == length]
+    # find the best candidate
+    if len(candidates) == 0:
+        return known_info.replace('_', '-')
+    else:
+        best = max(set(candidates), key=candidates.count)
+    return best
 
 def generate_description(clue, answer):
     question = f"In a crossword puzzle, why would {answer} would be clued as \"{clue}\"? Answer confidently in a single paragraph. If you can't determine a reason, just say 'no clue' and don't finish the paragraph."
@@ -173,7 +211,7 @@ def generate_answer_3(clue, length, tries=1):
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system",
-                    "content": "You are a crossword solver, and you are trying to solve a crossword puzzle. You are given a clue, and you must up with a possible solution."},
+                 "content": "You are a crossword solver, and you are trying to solve a crossword puzzle. You are given a clue, and you must up with a possible solution."},
                 {"role": "user", "content": question},
             ]
         )
@@ -226,5 +264,8 @@ if __name__ == '__main__':
 
     # print(revise_answer("Sailboat pole", 4, "M_ST"))
     # print(generate_answer_3("Sailboat pole", 4))
-    print(generate_answer_3("'Bob Hearts Abishola' network", 3))
+    # print(generate_answer_3("'Bob Hearts Abishola' network", 3))
+    # print all the functions in this program
+
+    print(check_answer('It might put you in an awkward position', 4, '_O_A'))
     #

@@ -1,12 +1,12 @@
 import pandas as pd
 import rapidfuzz.fuzz as fuzz
-# import every function from puzzle_solver.py
+# import every function from puzzle.py
 import puz
 from timeit import default_timer as timer
-from puzzle_solver import *
+from Solving.Solvers.puzzle import *
 import openai
 
-openai.api_key = "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"
+openai.api_key = "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"
 
 
 # find the clues that match the given clue by indexing the data frame
@@ -41,14 +41,14 @@ def find_clues_fuzzy(data, clue):
 
 if __name__ == '__main__':
 
-    file_name = 'uc230328'
+    # initialize the puzzle and the grid
+    file_name = 'uc230329'
     file_path = f"Puzzles/{file_name}.puz"
     p = puz.read(file_path)
     grid = make_grid(p)
     across, down = initialize_clues(p)
 
     # initialize the data frame with the correct encoding
-    # data = pd.read_csv('Puzzles/NYTData/nytcrosswords.csv', encoding='latin-1')
     data = pd.read_csv('Solving/Data/train.csv', encoding='latin-1')
     start = timer()
 
@@ -67,7 +67,9 @@ if __name__ == '__main__':
         # keep the answer that occurs the most
         if len(answer_list) > 0:
             new_answer = max(answer_list, key=answer_list.count).upper()
-            h_grid = fill_horizontal(h_grid, new_answer, position)
+            # check if all of the characters in the answer are 'X'
+            if not all(char == 'X' for char in new_answer):
+                h_grid = fill_horizontal(h_grid, new_answer, position)
     analyze(h_grid, full_grid)
 
     # repeat for down
@@ -80,9 +82,12 @@ if __name__ == '__main__':
         answer_list = [x for x in answer_list if len(x) == len(answer)]
         if len(answer_list) > 0:
             new_answer = max(answer_list, key=answer_list.count).upper()
-            v_grid = fill_vertical(v_grid, new_answer, position)
+            # check if all of the characters in the answer are 'X'
+            if not all(char == 'X' for char in new_answer):
+                v_grid = fill_vertical(v_grid, new_answer, position)
     analyze(v_grid, full_grid)
 
+    # merge the two grids from the dataset
     merged_grid_h = merge_grids(h_grid, v_grid)
     merged_grid_v = merge_grids(v_grid, h_grid)
     merged_grid = get_common_grid(merged_grid_h, merged_grid_v)
@@ -147,9 +152,6 @@ if __name__ == '__main__':
                                                                   threshold=thresh)
         else:
             break
-
-    h_candidates = find_horizontal_candidates(common_grid, full_grid, across, threshold=-.1)
-    print(h_candidates)
 
     save_grid(common_grid, f"{file_name}_revised")
     revised_grid = load_grid(f"{file_name}_revised")

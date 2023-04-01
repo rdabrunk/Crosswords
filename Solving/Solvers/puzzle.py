@@ -2,9 +2,6 @@ import puz
 import gpt_integration
 import csv
 from timeit import default_timer as timer
-import openai
-
-openai.api_key = "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"
 
 
 def initialize_clues(puzzle):
@@ -278,7 +275,7 @@ def find_revision_candidates(common_grid, solved_grid, across, down, threshold=0
                 percent_letters = 1 - percent_dashes
                 if percent_letters >= threshold:
                     # check if no letters are dashes
-                    if horizontal_grid[i][j].count('-') != 0:
+                    if horizontal_grid[i][j].count('-') != 0 or threshold == 0:
                         correct_word = solved_horizontal_grid[i][j]
                         # find the location of the word in the across list
                         location = 0
@@ -298,7 +295,7 @@ def find_revision_candidates(common_grid, solved_grid, across, down, threshold=0
                 percent_letters = 1 - percent_dashes
                 if percent_letters >= threshold:
                     # check if no letters are dashes
-                    if vertical_grid[i][j].count('-') != 0:
+                    if vertical_grid[i][j].count('-') != 0 or threshold == 0:
                         correct_word = solved_vertical_grid[i][j]
                         # find the location of the word in the across list
                         location = 0
@@ -328,7 +325,7 @@ def find_horizontal_candidates(common_grid, solved_grid, across, threshold=0.65)
                 percent_letters = 1 - percent_dashes
                 if percent_letters >= threshold:
                     # check if no letters are dashes
-                    if horizontal_grid[i][j].count('-') != 0:
+                    if horizontal_grid[i][j].count('-') != 0 or threshold == 0:
                         correct_word = solved_horizontal_grid[i][j]
                         # find the location of the word in the across list
                         location = 0
@@ -357,7 +354,7 @@ def find_vertical_candidates(common_grid, solved_grid, down, threshold=0.65):
                 percent_letters = 1 - percent_dashes
                 if percent_letters >= threshold:
                     # check if no letters are dashes
-                    if vertical_grid[i][j].count('-') != 0:
+                    if vertical_grid[i][j].count('-') != 0 or threshold == 0:
                         correct_word = solved_vertical_grid[i][j]
                         # find the location of the word in the down list
                         location = 0
@@ -400,6 +397,99 @@ def revise_vertical(grid, vertical_candidates):
             print("  ".join(row))
         print()
     return grid
+
+
+def check_horizontal(grid, horizontal_candidates):
+    for candidate in horizontal_candidates:
+        clue = candidate[0]
+        clue_location = candidate[2]
+        current_answer = candidate[3]
+        new_answer = gpt_integration.check_answer(clue, len(current_answer), current_answer)
+        if new_answer == None:
+            break
+        grid = fill_horizontal(grid, new_answer, clue_location)
+        for row in grid:
+            print("  ".join(row))
+        print()
+    return grid
+
+
+def check_vertical(grid, vertical_candidates):
+    for candidate in vertical_candidates:
+        clue = candidate[0]
+        clue_location = candidate[2]
+        current_answer = candidate[3]
+        new_answer = gpt_integration.check_answer(clue, len(current_answer), current_answer)
+        if new_answer == None:
+            break
+        grid = fill_vertical(grid, new_answer, clue_location)
+        for row in grid:
+            print("  ".join(row))
+        print()
+    return grid
+
+
+def get_candidate_percentage(candidate):
+    current_answer = candidate[3]
+    # get the number of characters in the answer that aren't underscores
+    filled = 0
+    for char in current_answer:
+        if char != '_':
+            filled += 1
+    return filled / len(current_answer)
+
+
+def sort_candidates(candidates):
+    # sort the candidates by the percentage of the answer that is filled in
+    return sorted(candidates, key=get_candidate_percentage, reverse=True)
+
+
+def revise_best_candidate(grid, horizontal_candidates, vertical_candidates):
+    best = []
+    # sort the candidates by the percentage of the answer that is filled in
+    horizontal_candidates = sort_candidates(horizontal_candidates)
+    vertical_candidates = sort_candidates(vertical_candidates)
+    # get the best candidate
+    if len(horizontal_candidates) > 0 and len(vertical_candidates) > 0:
+        # if the percentages are the same, choose the one with the smaller answer
+        if get_candidate_percentage(horizontal_candidates[0]) == get_candidate_percentage(vertical_candidates[0]):
+            if len(horizontal_candidates[0][3]) < len(vertical_candidates[0][3]):
+                best.append(horizontal_candidates[0])
+                grid = revise_horizontal(grid, best)
+            else:
+                best.append(vertical_candidates[0])
+                grid = revise_vertical(grid, best)
+        elif get_candidate_percentage(horizontal_candidates[0]) > get_candidate_percentage(vertical_candidates[0]):
+            best.append(horizontal_candidates[0])
+            grid = revise_horizontal(grid, best)
+
+        else:
+            best.append(vertical_candidates[0])
+            grid = revise_vertical(grid, best)
+
+    elif len(horizontal_candidates) == 0 and len(vertical_candidates) > 0:
+        best.append(vertical_candidates[0])
+        grid = revise_vertical(grid, best)
+    elif len(horizontal_candidates) > 0 and len(vertical_candidates) == 0:
+        best.append(horizontal_candidates[0])
+        grid = revise_horizontal(grid, best)
+
+    print(best)
+    return grid
+
+
+def filter_by_size(candidates, size):
+    # filter the candidates by the size of the answer
+    filtered = []
+    for candidate in candidates:
+        if len(candidate[3]) == size:
+            filtered.append(candidate)
+    return filtered
+
+
+def sort_by_size(candidates):
+    # sort the candidates by the size so that the smallest ones are first
+    return sorted(candidates, key=lambda x: len(x[3]))
 
 
 def get_percentage_filled(grid, solved_grid):
@@ -454,7 +544,7 @@ if __name__ == '__main__':
 
     start = timer()
 
-    file_name = 'nyt230328'
+    file_name = 'uc230329'
 
     file_path = f"Puzzles/{file_name}.puz"
     p = puz.read(file_path)
