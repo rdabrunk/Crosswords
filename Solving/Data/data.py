@@ -4,9 +4,6 @@ import rapidfuzz.fuzz as fuzz
 import puz
 from timeit import default_timer as timer
 from Solving.Solvers.puzzle import *
-import openai
-
-openai.api_key = "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"
 
 
 # find the clues that match the given clue by indexing the data frame
