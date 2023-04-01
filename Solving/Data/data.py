@@ -1,8 +1,6 @@
 import pandas as pd
 import rapidfuzz.fuzz as fuzz
-# import every function from puzzle.py
 import puz
-from timeit import default_timer as timer
 from Solving.Solvers.puzzle import *
 
 
