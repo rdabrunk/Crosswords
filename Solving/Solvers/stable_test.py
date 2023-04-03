@@ -4,7 +4,7 @@ from Solving.Data.data import *
 
 if __name__ == '__main__':
     # initialize the puzzle and the grid
-    file_name = 'uc230329'
+    file_name = 'uc230403'
     file_path = f"Puzzles/{file_name}.puz"
     p = puz.read(file_path)
     grid = make_grid(p)

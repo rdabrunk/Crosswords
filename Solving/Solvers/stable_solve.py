@@ -4,7 +4,7 @@ from Solving.Data.data import *
 
 if __name__ == '__main__':
     # initialize the puzzle and the grid
-    file_name = 'uc230331'
+    file_name = 'lat230403'
     file_path = f"Puzzles/{file_name}.puz"
     p = puz.read(file_path)
     grid = make_grid(p)
@@ -189,13 +189,11 @@ if __name__ == '__main__':
             revised_grid = revise_horizontal(revised_grid, h_candidates)
             h_candidates, v_candidates = find_revision_candidates(revised_grid, full_grid, across, down,
                                                                   threshold=thresh)
-            # thresh += 0.03
 
         if len(v_candidates) > 0:
             revised_grid = revise_vertical(revised_grid, v_candidates)
             h_candidates, v_candidates = find_revision_candidates(revised_grid, full_grid, across, down,
                                                                   threshold=thresh)
-            # thresh += 0.03
 
         if (thresh > 0.15):
             thresh -= 0.1

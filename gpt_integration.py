@@ -1,6 +1,11 @@
 import openai
 
-# Put OpenAI API key here
+
+# Put your API key here
+openai.api_key = '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'
+
+
+
 
 def check_answer(clue, length, known_info, tries=1):
     candidates = []

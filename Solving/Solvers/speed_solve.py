@@ -6,7 +6,7 @@ from timeit import default_timer as timer
 
 if __name__ == '__main__':
 
-    file_name = 'Universal - 20230401 - Universal Freestyle 66'
+    file_name = 'uc230403'
     file_path = f"Puzzles/{file_name}.puz"
     p = puz.read(file_path)
     grid = make_grid(p)
